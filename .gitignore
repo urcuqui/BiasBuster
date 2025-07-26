@@ -1,0 +1,10 @@
+notebook/hugging/hate/models--GroNLP--hateBERT/snapshots/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/vocab.txt
+notebook/hugging/hate/models--GroNLP--hateBERT/snapshots/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/tokenizer_config.json
+notebook/hugging/hate/models--GroNLP--hateBERT/snapshots/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/special_tokens_map.json
+notebook/hugging/hate/models--GroNLP--hateBERT/snapshots/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/model.safetensors
+notebook/hugging/hate/models--GroNLP--hateBERT/snapshots/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/config.json
+notebook/hugging/hate/models--GroNLP--hateBERT/refs/main
+notebook/hugging/hate/models--GroNLP--hateBERT/.no_exist/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/tokenizer.json
+notebook/hugging/hate/models--GroNLP--hateBERT/.no_exist/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/chat_template.jinja
+notebook/hugging/hate/models--GroNLP--hateBERT/.no_exist/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/added_tokens.json
+notebook/hugging/hate/models--GroNLP--hateBERT/.no_exist/1d439ddf8a588fc8c44c4169ff9e102f3e839cca/adapter_config.json
