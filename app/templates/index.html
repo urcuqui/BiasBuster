@@ -23,7 +23,26 @@
             height: 100vh;
             overflow: hidden;
         }
-
+         table.df-neon {
+            border-collapse: collapse;
+            width: 100%;
+            background: #111;
+            color: #0f0;
+            border: 1px solid #0f0;
+        }
+        table.df-neon th, table.df-neon td {
+            border: 1px solid #0f0;
+            padding: 8px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+        }
+        table.df-neon th {
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        table.df-neon tr:hover {
+            background: #0a0a0a;
+        }
         .sidebar {
             width: 30%;
             background-color: #111;
@@ -31,6 +50,16 @@
             align-items: center;
             justify-content: center;
             border-right: 2px solid #0f0;
+        }
+        .loading {
+            color: #00ff00;
+            font-style: italic;
+            animation: blink 1s infinite;
+        }
+         @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
         }
         .pet-gif {
         position: absolute;
@@ -44,10 +73,13 @@
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* Antes estaba 'center' */
             position: relative;
+            align-items: flex-start; /* Alinea a la izquierda si quieres */
         }
-
+        .section {
+            margin-top: 50px; /* Ajusta este valor para moverlo un poco hacia abajo */
+        }
         h1 {
             font-size: 2rem;
             animation: neonGlow 1s infinite alternate;
@@ -113,17 +145,62 @@
         z-index: 1000;
         pointer-events: none;
     }
+    #dfContainer {
+    margin-top: 1rem;
+    overflow-x: auto;   /* Scroll horizontal si es muy ancho */
+    overflow-y: auto;   /* Scroll vertical si es muy largo */
+    max-height: 300px;  /* Altura máxima visible */
+    border: 1px solid #0f0;
+    padding: 5px;
+    }
+    #downloadBtn {
+    background-color: transparent;
+    border: 2px solid #0f0;
+    color: #0f0;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    }
+    #downloadBtn:hover {
+        background-color: #0f0;
+        color: #000;
+        box-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+    }
     </style>
 </head>
 <body>
+     <!-- Menú superior -->
+    <nav style="position: fixed; top: 0; width: 100%; background-color: #111; border-bottom: 2px solid #00ff00; z-index: 999;">
+        <ul style="display: flex; list-style: none; margin: 0; padding: 10px; justify-content: center;">
+            <li style="margin: 0 15px;"><button onclick="showSection('home')">Principal</button></li>
+            <li style="margin: 0 15px;"><button onclick="showSection('scan')">Generator</button></li>
+            <li style="margin: 0 15px;"><button onclick="showSection('about')">About</button></li>
+        </ul>
+    </nav>
     <div class="sidebar">
         <img id="mascotGif" src="../static/panda_1.gif" alt="Mascot" width="400">
     </div>
     <div class="content">
-        <h1>BiasBuster</h1>
-        <textarea id="spamText" placeholder="Type your message here..."></textarea>
-        <button onclick="classify()">Classify</button>
-        <div class="result" id="result"></div>
+        <div id="home" class="section">
+            <h1>Welcome to BiasBuster</h1>
+            <p>Select an option in the menu to start.</p>
+        </div>
+        <div id="scan" class="section" style="display: none;">
+            <h1>BiasBuster</h1>
+           
+            <button onclick="generate()">Generate</button>
+            <div id="chat-box"></div>
+            <div class="result" id="result"></div>
+            <button id="downloadBtn" onclick="downloadCSV()" style="display:none;">Download CSV</button>
+            <div id="dfContainer" style="margin-top: 1rem; overflow:auto;"></div>
+        </div>
+        <div id="about" class="section" style="display: none;">
+            <h1>About this project</h1>
+            <p>BiasBuster is an AI-driven content auditing tool that identifies biased, unfair, or discriminatory language in user-generated or institutional text datasets.</p>
+        </div>
         <div class="hacking-phrases" id="hackingPhrases"></div>
         <div class="signature">
             ___   ___    __   ____  ___    ___    __     __    <br>
@@ -135,16 +212,51 @@
         </div>
     </div>
     <script>
-        async function classify() {
-            const message = document.getElementById('spamText').value;
-            const response = await fetch('/classify', {
+        async function downloadCSV() {
+            const response = await fetch('/download_csv', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ "e": "value" })
+            });
+        }
+        async function generate() {
+            const message = "no";
+            let loadingMessage = document.createElement('p');
+            let chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML += `<p><strong></p>`;
+            loadingMessage.className = 'loading';
+            loadingMessage.innerText = 'BiasBuster is thinking...';
+
+            document.getElementById('result').appendChild(loadingMessage);
+            const response = await fetch('/generate', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ message })
             });
-            const data = await response.json();
-            document.getElementById('result').textContent = `Result: ${data.result}`;
+            try {
+                if (response.ok) {
+                    let data = await response.json();
+                    loadingMessage.remove();
+                    const dfDiv = document.getElementById('dfContainer');
+                    dfDiv.innerHTML = data.table_html || "<em>No table returned</em>";
+                    document.getElementById('downloadBtn').style.display = "inline-block";
+                }else {
+                    loadingMessage.remove();
+                    loadingMessage.innerText = 'Error generating response.';
+                }            
+            } catch (error) {
+            loadingMessage.remove();
+            chatBox.innerHTML += `<p><strong>BiasBuster:</strong> Error: ${error.message}</p>`;
         }
+            
+        }
+        
+        function showSection(id) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(s => s.style.display = 'none');
+            document.getElementById(id).style.display = 'block';
+        }
+       
             // List all your gif filenames in the static folder
         const gifFiles = [
             'panda_1.gif',
@@ -203,6 +315,7 @@
         }
         showRandomPhrase();
         setInterval(showRandomPhrase, 5000);
+        
     </script>
 </body>
 </html>

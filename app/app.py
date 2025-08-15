@@ -8,7 +8,7 @@ import ast
 import numpy as np
 import nltk
 from nltk.tokenize import word_tokenize
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
 
 # Download the necessary NLTK data files
 nltk.download("punkt")
@@ -302,6 +302,28 @@ def create_synthetic_dataset():
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/generate", methods=["POST"])
+def generate():
+    print("Processing dataframe ...")
+    df = create_synthetic_dataset()
+    table_html = df.to_html(classes="df-neon", index=False, border=0, escape=True)
+    print("Synthetic dataset created.")
+    return jsonify({        
+        "table_html": table_html
+    })
+
+@app.route('/download_csv', methods=['POST'])
+def download_csv():
+    global df
+    csv_data = df.to_csv(index=False)
+    return Response(
+        csv_data,
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=result.csv"}
+    )
+
+
 
 if __name__ == '__main__':
     #models = generate_model_ensemble()
