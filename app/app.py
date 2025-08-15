@@ -303,20 +303,29 @@ def create_synthetic_dataset():
 def index():
     return render_template("index.html")
 
+df = pd.DataFrame([
+    {"feature": "length", "value": 42},
+    {"feature": "has_numbers", "value": True},
+    {"feature": "prediction", "value": "spam"}
+])
+
 @app.route("/generate", methods=["POST"])
 def generate():
+    global df
     print("Processing dataframe ...")
     df = create_synthetic_dataset()
+    df.to_csv("result.csv", index=False)
     table_html = df.to_html(classes="df-neon", index=False, border=0, escape=True)
     print("Synthetic dataset created.")
     return jsonify({        
         "table_html": table_html
     })
 
+
 @app.route('/download_csv', methods=['POST'])
 def download_csv():
     global df
-    csv_data = df.to_csv(index=False)
+    csv_data = df.to_csv("result.csv", index=False)
     return Response(
         csv_data,
         mimetype="text/csv",
